@@ -18,7 +18,9 @@
 | **20+ правил** | CRITICAL → INFO (секреты, root, `:latest`, ADD, пакеты…) |
 | **Отчёты** | Человекочитаемый текст + JSON |
 | **CI-friendly** | Exit code `0` / `1` в зависимости от CRITICAL/HIGH |
-| **Автофикс** | `ADD` → `COPY` и другие простые правки |
+| **Автофикс** | `ADD` → `COPY`, добавление non-root `USER` |
+| **Ignore** | `# check: ignore RULE-ID` в Dockerfile |
+| **SARIF** | Экспорт для GitHub Code Scanning |
 | **Расширяемость** | Новое правило = один метод в `SecurityChecker` |
 | **Zero deps** | Только стандартная библиотека Python 3.8+ |
 
@@ -40,8 +42,11 @@ python3 src/dockerfile_checker.py tests/dockerfiles/good_multistage.Dockerfile
 # JSON-отчёт
 python3 src/dockerfile_checker.py -f path/to/Dockerfile --json
 
-# Автоисправление
+# Автоисправление (ADD→COPY, добавление USER)
 python3 src/dockerfile_checker.py Dockerfile --fix -o Dockerfile.fixed
+
+# SARIF для GitHub Code Scanning
+python3 src/dockerfile_checker.py Dockerfile --sarif report.sarif
 ```
 
 ### Пример вывода
@@ -127,9 +132,9 @@ dockerfile-security-checker/
 ## Алгоритм работы
 
 ```text
-    Dockerfile
-         │
-         ▼
+Dockerfile
+    │
+    ▼
 ┌──────────────────┐
 │ DockerfileParser │  multi-line, multi-stage, comments
 └────────┬─────────┘
@@ -196,6 +201,35 @@ done
 
 ---
 
+
+### 8. Игнорирование правил
+
+В Dockerfile можно отключить отдельные правила:
+
+```dockerfile
+# check: ignore FROM-003
+# check: ignore SECRET-001, HC-001
+```
+
+```bash
+python3 src/dockerfile_checker.py tests/dockerfiles/with_ignore.Dockerfile
+# FROM-003, HC-001, COPY-001 не должны появиться в отчёте
+```
+
+### 9. SARIF-отчёт
+
+```bash
+python3 src/dockerfile_checker.py tests/dockerfiles/bad_root_latest.Dockerfile --sarif /tmp/report.sarif
+# Файл совместим с GitHub Code Scanning / VS Code SARIF Viewer
+```
+
+### 10. Автофикс USER
+
+```bash
+python3 src/dockerfile_checker.py tests/dockerfiles/bad_root_latest.Dockerfile --fix -o /tmp/fixed.Dockerfile
+grep -A2 -E "USER|adduser|useradd|addgroup" /tmp/fixed.Dockerfile
+```
+
 ## Документация по безопасности
 
 В репозитории есть полноценный чек-лист best practices:
@@ -222,10 +256,22 @@ done
 
 ---
 
-## Roadmap (идеи)
+## Лицензия
 
-- [ ] Больше автофиксов (добавление `USER`, объединение `RUN`)
-- [ ] Поддержка `docker-compose.yml` / Kubernetes securityContext
-- [ ] Интеграция с pre-commit / GitHub Action
-- [ ] Экспорт отчёта в SARIF
+MIT © 2026 — см. [LICENSE](LICENSE)
+
+---
+
+## Roadmap
+
+### Сделано в v1.1
+- [x] Игнорирование правил: `# check: ignore RULE-ID`
+- [x] Автофикс: добавление non-root `USER`
+- [x] Экспорт отчёта в SARIF 2.1.0
+
+### Дальше
+- [ ] Умное объединение последовательных `RUN`
+- [ ] Подстановка digest базового образа (opt-in)
+- [ ] Проверка `docker-compose.yml` и Kubernetes `securityContext`
+- [ ] GitHub Action / pre-commit hook
 - [ ] Правила для `.dockerignore`
