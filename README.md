@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)](#)
 [![CIS inspired](https://img.shields.io/badge/CIS%20Docker-inspired-orange.svg)](https://www.cisecurity.org/benchmark/docker)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 
 > Статический анализатор Dockerfile с фокусом на безопасность.  
 > Парсит Dockerfile, проверяет соответствие best practices и CIS Docker Benchmark (раздел 4), выдаёт рекомендации и умеет исправлять простые нарушения.
@@ -253,6 +254,12 @@ grep -A2 -E "USER|adduser|useradd|addgroup" /tmp/fixed.Dockerfile
 - [CIS Docker Benchmark](https://www.cisecurity.org/benchmark/docker) (Section 4)
 - [OWASP Docker Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)
 - Docker Hardened Images, distroless, BuildKit secrets (практики 2025–2026)
+
+---
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ---
 
